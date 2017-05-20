@@ -1,17 +1,16 @@
-
-
 import UIKit
+
 
 class ViewController: UIViewController,viewModelDelegate {
 
-  fileprivate  var vm:ViewModel!
+  var vm:ViewModel!
+    
   fileprivate  var imgView:UIImageView!
   fileprivate  var indicator:UIActivityIndicatorView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        vm = ViewModel()
+        self.view.backgroundColor = .white
         vm.delegate = self
         
         vm.initiate()
@@ -41,7 +40,7 @@ class ViewController: UIViewController,viewModelDelegate {
     }
     
     
-    func addLayoutConstraint(){
+    func addLayoutConstraint() {
         //layout
         imgView.translatesAutoresizingMaskIntoConstraints = false
         indicator.translatesAutoresizingMaskIntoConstraints = true
@@ -54,9 +53,9 @@ class ViewController: UIViewController,viewModelDelegate {
         imgView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).isActive = true
         indicator.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).isActive = true
         NSLayoutConstraint.activate([leading, trailing])
-    
     }
 
 
 }
+
 
