@@ -1,10 +1,12 @@
 import Foundation
 import UIKit
 
+/// Enumeration Error handling, you'll get back either a result or a failure not both
 enum Request<T> {
     case success(T)
-    case failure(Error)
+    case failure(Error?)
 }
+
 
 struct Model {
     typealias ResponseHandler = (Data)->()
@@ -19,7 +21,6 @@ struct Model {
     
     
     fileprivate func downloadTask(url:URL,completion: @escaping RequestHandler) {
-        
         URLSession.shared.dataTask(with: url) { (data:Data?, res:URLResponse?, err:Error?) in
             if (err == nil) {
                 guard let response = res as? HTTPURLResponse else { fatalError() }
@@ -27,15 +28,15 @@ struct Model {
                 if response.statusCode == 200 {
                     guard let imageData = data else { fatalError() }
                     completion(.success(imageData))
+                } else {
+                    // handle other statusCode
                 }
+                
             } else {
-                if let er = err {
-                    completion(.failure(er))
-                }
+                completion(.failure(err))
             }
-            }.resume()
-    }
-    
+    }.resume()
+ }
     
     func downloadDict(completion:@escaping(Dictionary<String,Any>?)-> Void) {
         
@@ -52,7 +53,6 @@ struct Model {
     }
     
     func downLoadImage(withURL route:URL ,completion:@escaping ResponseHandler) {
-        
         downloadTask(url:route) { request in
             switch request {
             case .success(let imgData):

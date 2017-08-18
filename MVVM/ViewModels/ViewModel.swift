@@ -1,29 +1,30 @@
 import Foundation
 import UIKit
 
-protocol viewModelDelegate: class {
-    func didImagesGetDownloaded(imgData:Data)
+protocol viewModelDataSource: class {
+    func didDownloadImageData(_ imgData:Data)
 }
 
 
 class ViewModel {
     
-    fileprivate let endpointString = "http://www.splashbase.co/api/v1/images/1"
-    fileprivate let model:Model!
-    public weak var delegate:viewModelDelegate?
+    private let model:Model!
+    public weak var datasource:viewModelDataSource?
     
-    init() {
-        guard let end = URL(string: endpointString)
-            else { fatalError() }
-        model = Model(withUrl: end )
-        
+    init(_ model:Model) {
+        self.model = model
     }
+    
     /// initiate: would get data from api then raise the delegate 
-    func initiate() {
+    public func initiate() {
         model?.downloadDict() { [weak self] dict in
-            self?.model.downLoadImage(withURL: ImageStructure(fromDictionary: dict).path()){ imgData in
-                self?.delegate?.didImagesGetDownloaded(imgData: imgData)
-            }
+            guard let strong = self,
+                    let item = ImageItem(dict)
+                    else { return }
+            
+            strong.model.downLoadImage(withURL: item.path) { imgData in
+                  strong.datasource?.didDownloadImageData(imgData)
+               }
         }
     }
     

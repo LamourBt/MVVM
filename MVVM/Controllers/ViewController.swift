@@ -1,61 +1,81 @@
 import UIKit
 
 
-class ViewController: UIViewController,viewModelDelegate {
+final class ViewController: UIViewController {
 
-  var vm:ViewModel!
+  // every time, you'll initialize this class 
+  // you need to init the viewModel
+  public var viewModel:ViewModel!
     
   fileprivate  var imgView:UIImageView!
   fileprivate  var indicator:UIActivityIndicatorView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.view.backgroundColor = .white
-        vm.delegate = self
-        
-        vm.initiate()
-        
-        imgView = UIImageView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height))
-        indicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+         setup()
+         prepareViewModel()
+    }
     
-        indicator.center = self.view.center
-        imgView.center = self.view.center
-
-        self.view.addSubview(indicator)
-        self.view.addSubview(imgView)
+    private func setup() {
+        view.backgroundColor = .white
+        let frame = CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height)
+        imgView = UIImageView(frame:frame )
+        indicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        indicator.center = view.center
+        imgView.center = view.center
+        view.addSubview(indicator)
+        view.addSubview(imgView)
         
-        addLayoutConstraint()
+        addingLayoutConstraint(imgView, view)
+        centerOutIndicator()
+        
         indicator.startAnimating()
     }
-
-    func didImagesGetDownloaded(imgData: Data) {
-          let img = UIImage(data: imgData)
-            DispatchQueue.main.async {
-                self.indicator.stopAnimating()
-                self.indicator.hidesWhenStopped = true
-                self.indicator.removeFromSuperview()
-                self.imgView.image = img
-                self.imgView.contentMode = .scaleAspectFit
-            }
+    
+    private func prepareViewModel() {
+        viewModel.datasource = self
+        viewModel.initiate()
     }
+
+
     
-    
-    func addLayoutConstraint() {
-        //layout
-        imgView.translatesAutoresizingMaskIntoConstraints = false
+    private func centerOutIndicator() {
         indicator.translatesAutoresizingMaskIntoConstraints = true
-        //pin
-        let leading =  imgView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor)
-        let trailing = imgView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
-        // align
-        imgView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
-        indicator.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
-        imgView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).isActive = true
         indicator.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).isActive = true
-        NSLayoutConstraint.activate([leading, trailing])
     }
 
-
+}
+// conforms on our viewModelDataSource
+extension ViewController: viewModelDataSource {
+    
+    func didDownloadImageData(_ imgData: Data) {
+        let img = UIImage(data: imgData)
+        DispatchQueue.main.async { [weak self ] in
+            guard let strongSelf = self else { return }
+            strongSelf.indicator.stopAnimating()
+            strongSelf.indicator.hidesWhenStopped = true
+            strongSelf.indicator.removeFromSuperview()
+            strongSelf.imgView.image = img
+            strongSelf.imgView.contentMode = .scaleAspectFit
+        }
+    }
 }
 
 
+extension UIViewController {
+
+     func addingLayoutConstraint( _ childView:UIView, _ parent:UIView) {
+        //layout
+        childView.translatesAutoresizingMaskIntoConstraints = false
+        //pin
+        let leading =  childView.leadingAnchor.constraint(equalTo: parent.leadingAnchor)
+        let trailing = childView.trailingAnchor.constraint(equalTo: parent.trailingAnchor)
+        // align
+        childView.centerXAnchor.constraint(equalTo: parent.centerXAnchor).isActive = true
+        childView.centerXAnchor.constraint(equalTo: parent.centerXAnchor).isActive = true
+        childView.centerYAnchor.constraint(equalTo: parent.centerYAnchor).isActive = true
+        // activate
+        NSLayoutConstraint.activate([leading, trailing])
+    }
+
+}
