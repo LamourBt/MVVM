@@ -1,4 +1,4 @@
-# MVVM (Model-View-ViewModel) where ViewModel talks to your Model 1
+# MVVM (Model-View-ViewModel) where ViewModel talks to your Model
 
 - is just another design pattern (there are MVC, MVP, etc...) that you can used to develop your application. 
 
